@@ -18,5 +18,6 @@ class Item(db.Model):
     description = db.Column(db.String(length=1024), nullable=False, unique=True)
     owner = db.Column(db.Integer(), db.ForeignKey('user.id'))
 
+    # Method __repr__ shows up the name of an item in db when called.
     def __repr__(self):
         return f'Item {self.name}'

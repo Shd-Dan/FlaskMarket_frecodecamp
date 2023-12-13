@@ -1,7 +1,9 @@
 from market import app
-from flask import render_template
-from market.models import Item
+from flask import render_template, redirect, url_for
+from market.models import Item, User
 from market.forms import RegisterForm
+# db is located in __init__
+from market import db
 
 
 @app.route("/")
@@ -16,8 +18,21 @@ def market_page():
     return render_template("market.html", item_name=items)
 
 
-@app.route('/register')
+# In order to allow the route receive and share data, specify methods as arguments.
+@app.route('/register', methods=['GET', 'POST'])
 def register_page():
     form = RegisterForm()
-
+    if form.validate_on_submit():
+        # gets data from forms.py which gets info form register.html
+        user_to_create = User(username=form.username.data,
+                              email_address=form.email_address.data,
+                              password_hash=form.password1.data)
+        # Passing pulled data to data-base
+        db.session.add(user_to_create)
+        db.session.commit()
+        # after registration gets redirected to market page
+        return redirect(url_for('market_page'))
+    if form.errors != {}: # If there are no errors from the validations
+        for err_msg in form.errors:
+            print(f"There was an error with creating a user: {err_msg}")
     return render_template('register.html', form=form)
