@@ -1,10 +1,11 @@
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_user, logout_user, login_required
+
 from market import app
-from flask import render_template, redirect, url_for, flash, get_flashed_messages
-from market.models import Item, User
-from market.forms import RegisterForm, LoginForm
 # db is located in __init__
 from market import db
-from flask_login import login_user, logout_user, login_required
+from market.forms import RegisterForm, LoginForm, PurchaseItemForm
+from market.models import Item, User
 
 
 @app.route("/")
@@ -13,11 +14,15 @@ def home_page():
     return render_template("home.html")
 
 
-@app.route('/market')
+@app.route('/market', methods=['GET', 'POST'])
 @login_required
 def market_page():
+    purchase_form = PurchaseItemForm()
+    if purchase_form.validate_on_submit():
+        print(request.form.get('purchased_item'))
     items = Item.query.all()
-    return render_template("market.html", item_name=items)
+
+    return render_template("market.html", item_name=items, purchase_form=purchase_form)
 
 
 # In order to allow the route receive and share data, specify methods as arguments.
